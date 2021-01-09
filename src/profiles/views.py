@@ -61,7 +61,7 @@ class ActivateEmail(views.APIView):
 
 class CreateStuffBBUser(generics.GenericAPIView):
     """
-    View для активации аккаунта
+    View для создания пользователя с правми модератор
     """
     permission_classes = [IsAdminUser]
     serializer_class = CreateStaffBBUserSerializer
