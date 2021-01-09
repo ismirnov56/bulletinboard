@@ -17,7 +17,6 @@ importlib-metadata==3.3.0
 kombu==5.0.2
 Pillow==8.1.0
 prompt-toolkit==3.0.9
-psycopg2==2.8.6
 pycparser==2.20
 PyJWT==2.0.0
 pytz==2020.5

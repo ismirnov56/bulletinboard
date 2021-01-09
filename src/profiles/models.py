@@ -31,6 +31,15 @@ class BBUserManager(UserManager):
         extra_fields.setdefault('is_active', False)
         return self._create_user(email, password, **extra_fields)
 
+    def create_stuff_user(self, email, password=None, **extra_fields):
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', False)
+        extra_fields.setdefault('is_active', True)
+
+        assert extra_fields['is_active']
+        assert extra_fields['is_staff']
+        return self._create_user(email, password, **extra_fields)
+
     def create_superuser(self, email, password=None, **extra_fields):
         """
             Вызываемый метод при создании суперпользователя, который вызывет метод _create_user.
@@ -59,6 +68,7 @@ class BBUser(AbstractUser):
                              validators=[phone_reg],
                              max_length=14,
                              blank=True,
+                             null=True,
                              unique=True,
                              error_messages={
                                  'unique': _("A user with that phone number already exists."),

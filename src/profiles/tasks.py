@@ -1,8 +1,8 @@
+from __future__ import absolute_import, unicode_literals
 from config.celery import app
-from django.core.mail import EmailMessage
+from .service import send
 
 
 @app.task
-def send_email(data):
-    email = EmailMessage(subject=data['email_subject'], body=data['email_body'], to=[data['to_email']])
-    email.send()
+def send_email_task(data):
+    send(data)

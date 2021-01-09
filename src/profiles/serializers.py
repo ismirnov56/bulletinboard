@@ -47,3 +47,23 @@ class CreateBBUserSerializer(serializers.ModelSerializer):
         with transaction.atomic():
             user = BBUser.objects.create_user(**validated_data)
         return user
+
+
+class CreateStaffBBUserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        model = BBUser
+        fields = ('id', 'email', 'password')
+
+    def create(self, validated_data):
+        try:
+            user = self.perform_create(validated_data)
+        except IntegrityError:
+            self.fail("cannot_create_user")
+        return user
+
+    def perform_create(self, validated_data):
+        with transaction.atomic():
+            user = BBUser.objects.create_stuff_user(**validated_data)
+        return user
