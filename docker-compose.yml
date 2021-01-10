@@ -34,8 +34,16 @@ services:
       - POSTGRES_PASSWORD=bb_pass
       - POSTGRES_DB=bulletinboard
 
-  celery_worker:
-    command: sh -c "sleep 10 && celery -A config worker -l info"
+  celery_worker_1:
+    command: sh -c "sleep 20 &&  celery -A config worker --loglevel=INFO --concurrency=10 -n worker1@%h"
+    depends_on:
+      - web
+      - db
+      - rabbitmq
+    image: web-image
+
+  celery_worker_2:
+    command: sh -c "sleep 20 &&  celery -A config worker --loglevel=INFO --concurrency=10 -n worker2@%h"
     depends_on:
       - web
       - db
