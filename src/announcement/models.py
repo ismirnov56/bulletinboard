@@ -5,7 +5,7 @@ from django.db import models
 from django.utils import timezone
 from mptt.models import MPTTModel, TreeForeignKey
 
-from ..places.models import Cities
+from ..places.models import City
 
 
 class Categories(MPTTModel):
@@ -44,7 +44,7 @@ class Announcements(models.Model):
     title = models.CharField(max_length=150, blank=True, null=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owner")
     category = models.ForeignKey(Categories, on_delete=models.SET_NULL, blank=True, null=True)
-    city = models.ForeignKey(Cities, on_delete=models.SET_NULL, blank=True, null=True)
+    city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True)
     views = models.PositiveIntegerField(default=0)

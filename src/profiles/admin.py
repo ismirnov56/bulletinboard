@@ -23,7 +23,7 @@ class BBUserAdmin(UserAdmin):
             'fields': ('email', 'phone', 'password1', 'password2'),
         }),
     )
-    list_display = ('email', 'is_staff')
+    list_display = ('email', 'is_active')
     search_fields = ('first_name', 'last_name', 'email')
     ordering = ('email',)
 

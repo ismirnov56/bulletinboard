@@ -12,35 +12,35 @@ from django.utils.translation import gettext_lazy as _
 
 class BBUserManager(UserManager):
 
-    def _create_user(self, email, password, **extra_fields):
+    def _create_user(self, email, phone, password, **extra_fields):
         """
             Общий метод создает и сохраняет пользователя с заданным адресом электронной почты, паролем.
         """
         email = self.normalize_email(email)
-        user = BBUser(email=email, **extra_fields)
+        user = BBUser(email=email, phone=phone, **extra_fields)
         user.password = make_password(password)
         user.save(using=self._db)
         return user
 
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, email, phone=None, password=None, **extra_fields):
         """
             Вызываемый метод при создании обычного пользователя, который вызывет метод _create_user.
         """
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
         extra_fields.setdefault('is_active', False)
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, phone, password, **extra_fields)
 
-    def create_stuff_user(self, email, password=None, **extra_fields):
+    def create_stuff_user(self, email, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', False)
         extra_fields.setdefault('is_active', True)
 
         assert extra_fields['is_active']
         assert extra_fields['is_staff']
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, phone, password, **extra_fields)
 
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, email, phone=None, password=None, **extra_fields):
         """
             Вызываемый метод при создании суперпользователя, который вызывет метод _create_user.
         """
@@ -51,7 +51,7 @@ class BBUserManager(UserManager):
         assert extra_fields['is_active']
         assert extra_fields['is_staff']
         assert extra_fields['is_superuser']
-        return self._create_user(email, password, **extra_fields)
+        return self._create_user(email, phone, password, **extra_fields)
 
 
 class BBUser(AbstractUser):
@@ -67,8 +67,7 @@ class BBUser(AbstractUser):
     phone = models.CharField(_('phone number'),
                              validators=[phone_reg],
                              max_length=14,
-                             blank=True,
-                             null=True,
+                             blank=False,
                              unique=True,
                              error_messages={
                                  'unique': _("A user with that phone number already exists."),
@@ -79,6 +78,6 @@ class BBUser(AbstractUser):
     is_blocked = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['phone']
 
     objects = BBUserManager()

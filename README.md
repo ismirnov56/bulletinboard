@@ -14,6 +14,27 @@ https://app.quickdatabasediagrams.com/#/d/atKUIT
     
 - активация по email в разработке...
 
+Запуск с docker:
+
+#### 1) Создание образа
+
+    docker-compose build
+
+##### 2) Запустить контейненр
+
+    docker-compose up
+    
+##### 3) Создать суперпользователя
+
+    docker exec -it bulletinboard_web_1 python manage.py createsuperuser
+    
+##### 4) Очистка Базы данных при необходимости
+
+     docker-compose down -v
+
+
+Запуск без использования docker:
+
 #### 1) Создание окружения
 
     pip install virtualenv
