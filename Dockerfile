@@ -24,8 +24,4 @@ RUN apk add --no-cache --virtual .build-deps \
     && apk add --virtual .rundeps $runDeps \
     && apk del .build-deps
 
-COPY ./prestart.sh .
-
 COPY . .
-
-ENTRYPOINT sh /usr/src/app/prestart.sh
