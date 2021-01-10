@@ -10,9 +10,10 @@ https://app.quickdatabasediagrams.com/#/d/atKUIT
 - созданы все модели;
 - создана View для регистрация пользователя (покрыто тестами)
     
-    python manage.py test src.profiles.tests.test_create
+    python manage.py test .
     
-- активация по email в разработке...
+- создана view для активации пользователя
+- с помощью докера поднимается брокер и два воркера для отправки активационных писем пользоватедям при регистрации
 
 Запуск с docker:
 
