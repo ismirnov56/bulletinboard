@@ -162,9 +162,10 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-EMAIL_HOST = 'smtp.mailtrap.io'
-EMAIL_HOST_USER = '84883a590e4fe7'
-EMAIL_HOST_PASSWORD = '6483f21bf3cb50'
-EMAIL_PORT = '2525'
+
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.mailtrap.io")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "84883a590e4fe7")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "6483f21bf3cb50")
+EMAIL_PORT = os.environ.get("EMAIL_PORT", "2525")
 
 CELERY_BROKER_URL = 'pyamqp://rabbitmq:5672'
