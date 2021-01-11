@@ -50,5 +50,15 @@ services:
       - rabbitmq
     image: web-image
 
+  dashboard:
+    command: sh -c "sleep 30 && flower -A config --port=5555"
+    ports:
+      - 5555:5555
+    depends_on:
+      - web
+      - db
+      - rabbitmq
+    image: web-image
+
 volumes:
   postgres_data:
