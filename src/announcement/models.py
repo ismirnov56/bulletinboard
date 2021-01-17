@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import models
 from django.utils import timezone
 from mptt.models import MPTTModel, TreeForeignKey
+from uuslug import uuslug
 
 from ..places.models import City
 
@@ -13,9 +14,9 @@ class Categories(MPTTModel):
     Модель категорий испольует mptt для создания дерева категорий
     https://django-mptt.readthedocs.io/en/latest/index.html
     """
-    title = models.CharField(max_length=150, blank=False),
-    slug = models.SlugField(unique=True),
-    description = models.TextField(blank=True),
+    name = models.CharField(max_length=150, blank=False, unique=True)
+    slug = models.SlugField(max_length=150, unique=True, blank=True)
+    description = models.TextField(blank=True)
     parent = TreeForeignKey(
         "self",
         on_delete=models.SET_NULL,
@@ -25,7 +26,21 @@ class Categories(MPTTModel):
     )
 
     class MPTTMeta:
-        order_insertion_by = ['title']
+        order_insertion_by = ['name']
+
+    def __str__(self):
+        return self.name
+
+    def __unicode__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        """
+        Создание уникального slug для категории
+        """
+        if not self.slug:
+            self.slug = uuslug(self.name, instance=self, max_length=150)
+        super(Categories, self).save(*args, **kwargs)
 
 
 class Announcements(models.Model):
@@ -67,7 +82,7 @@ class Images(models.Model):
     """
     Модель обеспечивающая сохранение картинок, вынесена в отдельную т.к. у одного объявления может быть несколько картинок
     """
-    announcement = models.ForeignKey(Announcements, on_delete=models.CASCADE)
+    announcement = models.ForeignKey(Announcements, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to=announcements_directory_path, null=True, blank=True)
 
     def __str__(self):

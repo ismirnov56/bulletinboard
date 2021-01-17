@@ -19,7 +19,7 @@ class Country(models.Model):
         Также данная библиотека позволяет генерировать уникальные slug поля
         """
         if not self.slug:
-            self.slug = uuslug(self.name, instance=self, max_length=10)
+            self.slug = uuslug(self.name, instance=self, max_length=50)
         super(Country, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -42,7 +42,7 @@ class Region(models.Model):
         Аналогично модели Country
         """
         if not self.slug:
-            self.slug = uuslug(self.name, instance=self, max_length=10)
+            self.slug = uuslug(self.name, instance=self, max_length=50)
         super(Region, self).save(*args, **kwargs)
 
     def __str__(self):
@@ -65,7 +65,7 @@ class City(models.Model):
         Аналогично модели Country
         """
         if not self.slug:
-            self.slug = uuslug(self.name, instance=self, max_length=10)
+            self.slug = uuslug(self.name, instance=self, max_length=50)
         super(City, self).save(*args, **kwargs)
 
     def __str__(self):

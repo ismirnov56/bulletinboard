@@ -4,6 +4,7 @@ from django.conf import settings
 from django.db import IntegrityError, transaction
 from rest_framework import serializers
 from rest_framework.settings import api_settings
+from rest_framework_simplejwt.serializers import TokenObtainSerializer, TokenObtainSlidingSerializer
 
 from .models import BBUser
 
@@ -50,6 +51,9 @@ class CreateBBUserSerializer(serializers.ModelSerializer):
 
 
 class CreateStaffBBUserSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для создания пользователя с правами stuff
+    """
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
 
     class Meta:
