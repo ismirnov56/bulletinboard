@@ -10,6 +10,6 @@ class ListAnnouncements(ListAPIView):
     """
     Список всех объявлений доступный для просмотра всем
     """
-    queryset = Announcements.objects.get(status='active')
+    queryset = Announcements.objects.filter(status='active')
     permission_classes = [AllowAny]
     serializer_class = AnnouncementsSerializer
