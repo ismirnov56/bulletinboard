@@ -26,7 +26,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
 
+    'django_filters',
     'mptt',
 
     'src.profiles',
@@ -129,6 +131,7 @@ AUTH_USER_MODEL = 'profiles.BBUser'
 
 REST_FRAMEWORK = {
     # аутентификация с помощью JWT токена
+    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
@@ -161,7 +164,6 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=60),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "smtp.mailtrap.io")
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "84883a590e4fe7")

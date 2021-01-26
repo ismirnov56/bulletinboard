@@ -3,7 +3,6 @@ from django.contrib.auth.models import UserManager, AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
 """
     https://docs.djangoproject.com/en/3.1/topics/auth/customizing/
     Кастомная аутентификация была реализована исходя из докоментации и в соответсвии с ТЗ
@@ -34,9 +33,8 @@ class BBUserManager(UserManager):
     def create_stuff_user(self, email, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', False)
-        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_active', False)
 
-        assert extra_fields['is_active']
         assert extra_fields['is_staff']
         return self._create_user(email, phone, password, **extra_fields)
 

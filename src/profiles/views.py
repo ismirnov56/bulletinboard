@@ -2,14 +2,15 @@ from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from rest_framework import status, generics, views
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 import jwt
 
 from src.base.permissions import IsAdminUser
 from src.profiles.models import BBUser
-from src.profiles.serializers import CreateBBUserSerializer, CreateStaffBBUserSerializer
+from src.profiles.serializers import CreateBBUserSerializer, CreateStaffBBUserSerializer, LoginSerializer, \
+    LogoutSerializer
 from src.profiles.tasks import send_email_task
 
 
@@ -61,7 +62,26 @@ class ActivateEmail(views.APIView):
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CreateStuffBBUser(generics.GenericAPIView):
+class LoginAPIView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class LogoutAPIView(generics.GenericAPIView):
+    serializer_class = LogoutSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+class CreateBBUserForAdmin(generics.GenericAPIView):
     """
     View для создания пользователя с правми модератор
     """
