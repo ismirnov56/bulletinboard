@@ -75,7 +75,7 @@ def announcements_directory_path(instance, filename):
     """
     функция для обеспечения красивой ссылки при сохранении картинки в файловую систему
     """
-    return 'announcements/announcement_{0}/{1}'.format(instance.announcement.uuid, filename)
+    return 'announcements/announcement{0}/{1}'.format(instance.announcement.uuid, filename)
 
 
 class Images(models.Model):

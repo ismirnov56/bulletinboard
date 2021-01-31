@@ -1,18 +1,18 @@
 from django.urls import path
 from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
     TokenRefreshView,
 )
 
-from src.profiles.views import BBUserCreate, ActivateEmail, CreateBBUserForAdmin, LoginAPIView, LogoutAPIView
+from src.profiles.views import ActivateEmail, CreateModeratorUser, LoginAPIView, LogoutAPIView, CreateBBUser
 
 # url-ы для работы с пользователями
 
+
 urlpatterns = [
-    path('users/', BBUserCreate.as_view(), name='account-create'),
-    path('staff/', CreateBBUserForAdmin.as_view(), name='stuff-create'),
+    path('users/', CreateBBUser.as_view(), name='account-create'),
+    path('staff/', CreateModeratorUser.as_view(), name='stuff-create'),
     path('users/activate/', ActivateEmail.as_view(), name='email-activate'),
-    path('auth/login/', LoginAPIView.as_view(), name='token_login'),
+    path('auth/login/', LoginAPIView.as_view(), name='token-login'),
     path('auth/logout/', LogoutAPIView.as_view(), name='logout'),
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token-refresh'),
 ]

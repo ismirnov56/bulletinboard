@@ -6,7 +6,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 import jwt
-
 from src.base.permissions import IsAdminUser
 from src.profiles.models import BBUser
 from src.profiles.serializers import CreateBBUserSerializer, CreateStaffBBUserSerializer, LoginSerializer, \
@@ -14,12 +13,10 @@ from src.profiles.serializers import CreateBBUserSerializer, CreateStaffBBUserSe
 from src.profiles.tasks import send_email_task
 
 
-class BBUserCreate(generics.GenericAPIView):
+class GeneralBBUserCreate(generics.GenericAPIView):
     """
-    View для создания пользователя
+        View для создания пользователя
     """
-    permission_classes = [AllowAny]
-    serializer_class = CreateBBUserSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -36,13 +33,32 @@ class BBUserCreate(generics.GenericAPIView):
                      + activate_url
         data = {'email_body': email_body, 'to_email': user.email,
                 'email_subject': 'Verify your email'}
-        send_email_task.delay(data)
+        if settings.TEST:
+            send_email_task(data)
+        else:
+            send_email_task.delay(data)
         return Response(user_data, status=status.HTTP_201_CREATED)
+
+
+class CreateBBUser(GeneralBBUserCreate):
+    """
+        View для создания простого пользователя
+    """
+    permission_classes = [AllowAny]
+    serializer_class = CreateBBUserSerializer
+
+
+class CreateModeratorUser(GeneralBBUserCreate):
+    """
+        View для создания пользователя с правми модератор
+    """
+    permission_classes = [IsAdminUser]
+    serializer_class = CreateStaffBBUserSerializer
 
 
 class ActivateEmail(views.APIView):
     """
-    View для активации аккаунта
+        View для активации аккаунта
     """
 
     def get(self, request):
@@ -50,11 +66,12 @@ class ActivateEmail(views.APIView):
         try:
             payload = jwt.decode(token, settings.SECRET_KEY, algorithms='HS256')
             user = BBUser.objects.get(id=payload['user_id'])
-            if not user.is_active:
+            if not user.is_verify:
+                user.is_verify = True
                 user.is_active = True
                 user.save()
             else:
-                return Response({'error': 'Invalid activation url'})
+                return Response({'error': 'Invalid activation url'}, status=status.HTTP_400_BAD_REQUEST)
             return Response({'email': 'Successfully activated'}, status=status.HTTP_200_OK)
         except jwt.ExpiredSignatureError:
             return Response({'error': 'Activation Expired'}, status=status.HTTP_400_BAD_REQUEST)
@@ -63,6 +80,9 @@ class ActivateEmail(views.APIView):
 
 
 class LoginAPIView(generics.GenericAPIView):
+    """
+        Вход пользователя и получение JWT токена
+    """
     serializer_class = LoginSerializer
 
     def post(self, request):
@@ -72,6 +92,9 @@ class LoginAPIView(generics.GenericAPIView):
 
 
 class LogoutAPIView(generics.GenericAPIView):
+    """
+        Выход пользователя и занесение токена в black list
+    """
     serializer_class = LogoutSerializer
     permission_classes = [IsAuthenticated]
 
@@ -80,17 +103,3 @@ class LogoutAPIView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-class CreateBBUserForAdmin(generics.GenericAPIView):
-    """
-    View для создания пользователя с правми модератор
-    """
-    permission_classes = [IsAdminUser]
-    serializer_class = CreateStaffBBUserSerializer
-
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        user_data = serializer.data
-        return Response(user_data, status=status.HTTP_201_CREATED)

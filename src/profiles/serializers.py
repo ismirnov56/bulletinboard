@@ -1,4 +1,3 @@
-from django.contrib import auth
 from django.contrib.auth.models import update_last_login
 from django.contrib.auth.password_validation import validate_password
 from django.core import exceptions
@@ -79,10 +78,13 @@ class LoginSerializer(serializers.Serializer):
     """
     Сериализатор для аутентификации пользователя
     """
-    email = serializers.EmailField(write_only=True)
+    email = serializers.EmailField()
     password = serializers.CharField(write_only=True)
     refresh = serializers.CharField(read_only=True)
     access = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
+    is_staff = serializers.BooleanField(read_only=True)
+    is_admin = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = BBUser
@@ -91,27 +93,38 @@ class LoginSerializer(serializers.Serializer):
     def validate(self, attrs):
         email = attrs.get('email')
         password = attrs.get('password')
-        user = auth.authenticate(email=email, password=password)
 
-        if not user:
-            raise AuthenticationFailed('Invalid credentials, try again ' + str(email))
+        try:
+            user = BBUser.objects.get(email=email)
+        except BBUser.DoesNotExist:
+            raise AuthenticationFailed('Invalid credentials, try again')
 
-        if user.is_blocked:
-            raise AuthenticationFailed('User is blocked, contact Admin')
+        if not user.check_password(password):
+            raise AuthenticationFailed('Invalid credentials, try again')
+
+        if not user.is_verify:
+            raise AuthenticationFailed('User is not verify, please activate your account with email or contact Admin')
 
         if not user.is_active:
-            raise AuthenticationFailed('Account is not active')
+            raise AuthenticationFailed('User is blocked, contact Admin')
 
         update_last_login(None, user)
 
         tokens = RefreshToken.for_user(user)
 
         return {
+            'email': email,
+            'is_staff': user.is_staff,
+            'is_admin': user.is_superuser,
             'refresh': str(tokens),
             'access': str(tokens.access_token)
         }
 
+
 class LogoutSerializer(serializers.Serializer):
+    """
+        Сериализатор для выхода пользователя, токен заносится в black list
+    """
     refresh = serializers.CharField()
 
     default_error_message = {
@@ -121,7 +134,6 @@ class LogoutSerializer(serializers.Serializer):
     def validate(self, attrs):
         self.token = attrs['refresh']
         return attrs
-
 
     def save(self, **kwargs):
         try:
