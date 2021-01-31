@@ -14,7 +14,7 @@ class Categories(MPTTModel):
     Модель категорий испольует mptt для создания дерева категорий
     https://django-mptt.readthedocs.io/en/latest/index.html
     """
-    name = models.CharField(max_length=150, blank=False, unique=True)
+    name = models.CharField(max_length=150, blank=False)
     slug = models.SlugField(max_length=150, unique=True, blank=True)
     description = models.TextField(blank=True)
     parent = TreeForeignKey(
@@ -38,8 +38,12 @@ class Categories(MPTTModel):
         """
         Создание уникального slug для категории
         """
-        if not self.slug:
-            self.slug = uuslug(self.name, instance=self, max_length=150)
+        category = self
+        temp_slug = uuslug(self.name, instance=self, max_length=150)
+        while category.parent:
+            temp_slug += '-' + category.parent.slug
+            category = category.parent
+        self.slug = temp_slug
         super(Categories, self).save(*args, **kwargs)
 
 
