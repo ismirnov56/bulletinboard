@@ -35,9 +35,31 @@ class CategoryForAnnouncementsSerializer(serializers.ModelSerializer):
         fields = ['name']
 
 
-class AnnouncementsSerializer(serializers.ModelSerializer):
+class AnnouncementsListSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для объявлений
+    Сериализатор для списка объявлений
+    """
+    images = ImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Announcements
+        fields = ['uuid', 'title', 'description', 'price', 'views', 'update_at']
+
+
+class AnnouncementsUserListSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для списка объявлений пользователя
+    """
+    images = ImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Announcements
+        fields = ['uuid', 'title', 'status', 'description', 'price', 'views', 'update_at']
+
+
+class AnnouncementsRetrieveSerializer(serializers.ModelSerializer):
+    """
+        Сериализатор для просмотра конеретного объявления
     """
     user = OwnerInfoSerializer(read_only=True)
     images = ImageSerializer(many=True, read_only=True)
@@ -46,20 +68,18 @@ class AnnouncementsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Announcements
-        fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'user', 'category', 'views', 'create_at',
-                  'update_at']
+        fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'user', 'category', 'views', 'update_at']
 
 
-class AnnouncementsUserSerializer(serializers.ModelSerializer):
+class AnnouncementsRetrieveUserSerializer(serializers.ModelSerializer):
     """
-    Сериализатор для объявлений
+        Сериализатор для объявлений
     """
-    user = OwnerInfoSerializer(read_only=True)
     images = ImageSerializer(many=True, read_only=True)
     category = CategoryForAnnouncementsSerializer(read_only=True)
     city = CitySerializer(read_only=True)
 
     class Meta:
         model = Announcements
-        fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'user', 'category', 'views', 'create_at',
+        fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'category', 'views', 'create_at',
                   'update_at', 'status']

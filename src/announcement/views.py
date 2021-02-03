@@ -5,7 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from src.announcement.models import Announcements
-from src.announcement.serializers import AnnouncementsSerializer
+from src.announcement.serializers import AnnouncementsListSerializer, AnnouncementsRetrieveSerializer, \
+    AnnouncementsRetrieveUserSerializer
 from src.base.permissions import IsAuthenticatedAndOwner
 
 
@@ -15,20 +16,7 @@ class ListActiveAnnouncements(ListAPIView):
     """
     queryset = Announcements.objects.filter(status='active')
     permission_classes = [AllowAny]
-    serializer_class = AnnouncementsSerializer
-
-
-class ListUserAnnouncements(ListAPIView):
-    """
-        Список объявлений пользователя
-    """
-    permission_classes = [IsAuthenticated]
-    serializer_class = AnnouncementsSerializer
-    filter_backends = [DjangoFilterBackend]
-    filter_fields = ['status']
-
-    def get_queryset(self):
-        return Announcements.objects.filter(user=self.request.user)
+    serializer_class = AnnouncementsListSerializer
 
 
 class RetrieveActiveAnnouncement(RetrieveAPIView):
@@ -38,7 +26,7 @@ class RetrieveActiveAnnouncement(RetrieveAPIView):
     queryset = Announcements.objects.filter(status='active')
     lookup_field = 'uuid'
     permission_classes = [AllowAny]
-    serializer_class = AnnouncementsSerializer
+    serializer_class = AnnouncementsRetrieveSerializer
 
     def get(self, request, *args, **kwargs):
         """
@@ -52,16 +40,32 @@ class RetrieveActiveAnnouncement(RetrieveAPIView):
         return super().get(request, *args, **kwargs)
 
 
+class ListUserAnnouncements(ListAPIView):
+    """
+        Список объявлений пользователя
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = AnnouncementsListSerializer
+    filter_backends = [DjangoFilterBackend]
+    filter_fields = ['status']
+
+    def get_queryset(self):
+        return Announcements.objects.filter(user=self.request.user)
+
+
 class RetrieveUserAnnouncement(RetrieveAPIView):
+    """
+        Объявление которое создал пользователь
+    """
     queryset = Announcements.objects.filter(status='active')
     lookup_field = 'uuid'
-    permission_classes = [AllowAny]
-    serializer_class = AnnouncementsSerializer
+    permission_classes = [IsAuthenticatedAndOwner]
+    serializer_class = AnnouncementsRetrieveUserSerializer
 
 
 class DestroyAnnouncement(DestroyAPIView):
     """
-    Удаление объявления
+        Удаление объявления
     """
     queryset = Announcements.objects.filter(status__in=['active', 'draft', 'rejected', 'on_moderation'])
     permission_classes = [IsAuthenticatedAndOwner]

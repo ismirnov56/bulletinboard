@@ -18,7 +18,7 @@ class CreateBBUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = BBUser
-        fields = ('id', 'email', 'phone', 'password')
+        fields = ('id', 'email', 'phone', 'password', 'first_name', 'last_name', 'middle_name', 'info')
 
     def validate(self, attrs):
         """
