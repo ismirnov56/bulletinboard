@@ -43,7 +43,7 @@ class AnnouncementsListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Announcements
-        fields = ['uuid', 'title', 'description', 'price', 'views', 'update_at']
+        fields = ['uuid', 'title', 'description', 'images', 'price', 'views', 'update_at']
 
 
 class AnnouncementsUserListSerializer(serializers.ModelSerializer):
@@ -54,7 +54,7 @@ class AnnouncementsUserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Announcements
-        fields = ['uuid', 'title', 'status', 'description', 'price', 'views', 'update_at']
+        fields = ['uuid', 'title', 'status', 'images', 'description', 'price', 'views', 'update_at']
 
 
 class AnnouncementsRetrieveSerializer(serializers.ModelSerializer):
