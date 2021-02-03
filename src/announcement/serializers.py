@@ -47,4 +47,19 @@ class AnnouncementsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Announcements
         fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'user', 'category', 'views', 'create_at',
+                  'update_at']
+
+
+class AnnouncementsUserSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для объявлений
+    """
+    user = OwnerInfoSerializer(read_only=True)
+    images = ImageSerializer(many=True, read_only=True)
+    category = CategoryForAnnouncementsSerializer(read_only=True)
+    city = CitySerializer(read_only=True)
+
+    class Meta:
+        model = Announcements
+        fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'user', 'category', 'views', 'create_at',
                   'update_at', 'status']

@@ -1,9 +1,13 @@
 from django.urls import path
 
 # url-ы для работы с объявлениями
-from src.announcement.views import ListAnnouncements, RetrieveAnnouncement
+from src.announcement.views import ListActiveAnnouncements, RetrieveActiveAnnouncement, DestroyAnnouncement,\
+    ListUserAnnouncements, RetrieveUserAnnouncement
 
 urlpatterns = [
-    path('announcements/', ListAnnouncements.as_view(), name='announcements-list'),
-    path('announcement/<uuid>', RetrieveAnnouncement.as_view(), name='announcements-detail')
+    path('', ListActiveAnnouncements.as_view(), name='announcements-list'),
+    path('<uuid>', RetrieveActiveAnnouncement.as_view(), name='announcements-detail'),
+    path('me/', ListUserAnnouncements.as_view(), name='user-announcements-list'),
+    path('me/<uuid>', DestroyAnnouncement.as_view(), name='announcements-delete'),
+    path('me/<uuid>', RetrieveUserAnnouncement.as_view(), name='user-announcements-delete')
 ]

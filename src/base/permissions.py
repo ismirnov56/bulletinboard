@@ -26,7 +26,7 @@ class IsStuffUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_stuff)
+        return bool(request.user and request.user.is_staff)
 
 
 class IsAdminOrReadOnly(BasePermission):

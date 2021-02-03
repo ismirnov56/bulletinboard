@@ -1,10 +1,13 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.static import static
 
+from config import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/', include('src.profiles.urls')),
-    path('api/v1/', include('src.announcement.urls')),
-    path('api/v1/', include('src.places.urls'))
+    path('api/v1/', include('src.routers'))
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

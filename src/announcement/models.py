@@ -41,7 +41,7 @@ class Categories(MPTTModel):
         category = self
         temp_slug = uuslug(self.name, instance=self, max_length=150)
         while category.parent:
-            temp_slug += '-' + category.parent.slug
+            temp_slug = category.parent.slug + '-' + temp_slug
             category = category.parent
         self.slug = temp_slug
         super(Categories, self).save(*args, **kwargs)
