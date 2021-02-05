@@ -1,10 +1,16 @@
+import sys
 import uuid
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.files.images import get_image_dimensions
 from django.db import models
 from django.utils import timezone
 from mptt.models import MPTTModel, TreeForeignKey
 from uuslug import uuslug
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 
 from ..places.models import City
 
@@ -60,8 +66,8 @@ class Announcements(models.Model):
     )
 
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    title = models.CharField(max_length=150, blank=True, null=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owner")
+    title = models.CharField(max_length=150, blank=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owner", blank=True)
     category = models.ForeignKey(Categories, on_delete=models.SET_NULL, blank=True, null=True)
     city = models.ForeignKey(City, on_delete=models.SET_NULL, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
@@ -82,12 +88,44 @@ def announcements_directory_path(instance, filename):
     return 'announcements/announcement{0}/{1}'.format(instance.announcement.uuid, filename)
 
 
+def validate_image(image):
+    """
+        Валидация изображения
+    """
+    max_height = 300
+    max_width = 300
+    width, height = get_image_dimensions(image.file)
+    if width <= max_width or height <= max_height:
+        raise ValidationError("Height or Width is larger than what is allowed")
+
+
 class Images(models.Model):
     """
     Модель обеспечивающая сохранение картинок, вынесена в отдельную т.к. у одного объявления может быть несколько картинок
     """
-    announcement = models.ForeignKey(Announcements, related_name='images', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to=announcements_directory_path, null=True, blank=True)
+    announcement = models.ForeignKey(Announcements, related_name='images', on_delete=models.CASCADE, blank=False)
+    image = models.ImageField(upload_to=announcements_directory_path, blank=False, validators=[validate_image])
 
     def __str__(self):
         return f'id: {self.id} announcement: {self.announcement.uuid}'
+
+    def save(self, *args, **kwargs):
+        """
+        Изменение размера изображения при сохранении
+        """
+        img = Image.open(self.image)
+
+        if img.height > 1500 or img.width > 1500:
+            output_size = (img.width / 2, img.height / 2)
+            img.thumbnail(output_size)
+            img = img.convert('RGB')
+
+            output = BytesIO()
+            img.save(output, format='JPEG')
+            output.seek(0)
+
+            self.image = InMemoryUploadedFile(output, 'ImageField',
+                                              f'{self.image.name.split(".")[0]}.jpg',
+                                              'image/jpeg', sys.getsizeof(output),
+                                              None)
+        super().save(*args, **kwargs)

@@ -9,7 +9,7 @@ class ModerationSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Moderation
-        fields = ['id', 'user', 'announcement', 'status', 'info_result']
+        fields = ['id', 'user', 'status', 'info_result']
 
     def save(self, **kwargs):
         """
@@ -20,7 +20,7 @@ class ModerationSerializer(serializers.ModelSerializer):
         announcement = self.validated_data['announcement']
         status = self.validated_data['status']
         if announcement.status != 'on_moderation':
-            raise serializers.ValidationError({'announcement':'Announcement has bad status'})
+            raise serializers.ValidationError({'announcement': 'Announcement has bad status'})
         if status == 'publish':
             announcement.status = 'active'
         else:

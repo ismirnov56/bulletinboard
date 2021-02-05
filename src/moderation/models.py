@@ -15,7 +15,7 @@ class Moderation(models.Model):
     )
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True,
                              related_name="moderator")
-    announcement = models.ForeignKey(Announcements, on_delete=models.CASCADE, blank=True)
+    announcement = models.ForeignKey(Announcements, on_delete=models.CASCADE)
     status = models.CharField(max_length=10, choices=STATUSES, default='no_publish')
     info_result = models.TextField(blank=True, null=True)
     create_at = models.DateTimeField(default=timezone.now)

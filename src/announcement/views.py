@@ -1,12 +1,14 @@
+from django.core import exceptions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView, UpdateAPIView
+from rest_framework.exceptions import ValidationError
+from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView, CreateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from src.announcement.models import Announcements
 from src.announcement.serializers import AnnouncementsListSerializer, AnnouncementsRetrieveSerializer, \
-    AnnouncementsRetrieveUserSerializer
+    AnnouncementsRetrieveUserSerializer, AnnouncementCreateSerializer, ImageSerializer
 from src.base.permissions import IsAuthenticatedAndOwner
 
 
@@ -61,6 +63,36 @@ class RetrieveUserAnnouncement(RetrieveAPIView):
     lookup_field = 'uuid'
     permission_classes = [IsAuthenticatedAndOwner]
     serializer_class = AnnouncementsRetrieveUserSerializer
+
+
+class CreateAnnouncement(CreateAPIView):
+    """
+        Создание объявления
+    """
+
+    permission_classes = [IsAuthenticated]
+    serializer_class = AnnouncementCreateSerializer
+
+    def perform_create(self, serializer):
+        serializer.validated_data['user'] = self.request.user
+        serializer.save()
+
+
+class CreateImagesForAnnouncement(CreateAPIView):
+    """
+        Создание изображений
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageSerializer
+    lookup_field = 'announcement_uuid'
+
+    def perform_create(self, serializer):
+        try:
+            obj = Announcements.objects.get(uuid=self.kwargs['announcement_uuid'], user=self.request.user)
+        except exceptions.ValidationError:
+            raise ValidationError({'announcement': 'Not found announcement'})
+        serializer.validated_data['announcement'] = obj
+        serializer.save()
 
 
 class DestroyAnnouncement(DestroyAPIView):

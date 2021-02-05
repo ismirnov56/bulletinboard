@@ -83,3 +83,13 @@ class AnnouncementsRetrieveUserSerializer(serializers.ModelSerializer):
         model = Announcements
         fields = ['uuid', 'title', 'description', 'price', 'city', 'images', 'category', 'views', 'create_at',
                   'update_at', 'status']
+
+
+class AnnouncementCreateSerializer(serializers.ModelSerializer):
+    """
+        Сериализатор для создания объявлений
+    """
+
+    class Meta:
+        model = Announcements
+        fields = ['uuid', 'title', 'description', 'price', 'city', 'category', 'views', 'status']
