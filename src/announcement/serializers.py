@@ -12,7 +12,7 @@ class ImageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Images
-        fields = ['image']
+        fields = ['id', 'image']
 
 
 class OwnerInfoSerializer(serializers.ModelSerializer):
@@ -32,7 +32,7 @@ class CategoryForAnnouncementsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Categories
-        fields = ['name']
+        fields = ['id', 'name']
 
 
 class AnnouncementsListSerializer(serializers.ModelSerializer):
@@ -85,11 +85,12 @@ class AnnouncementsRetrieveUserSerializer(serializers.ModelSerializer):
                   'update_at', 'status']
 
 
-class AnnouncementCreateSerializer(serializers.ModelSerializer):
+class AnnouncementCreateUpdateSerializer(serializers.ModelSerializer):
     """
         Сериализатор для создания объявлений
     """
 
     class Meta:
         model = Announcements
-        fields = ['uuid', 'title', 'description', 'price', 'city', 'category', 'views', 'status']
+        fields = ['title', 'description', 'price', 'city', 'category', 'status']
+

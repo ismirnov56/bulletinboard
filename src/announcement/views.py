@@ -1,14 +1,15 @@
 from django.core import exceptions
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
-from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView, DestroyAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from src.announcement.models import Announcements
+from src.announcement.models import Announcements, Images
 from src.announcement.serializers import AnnouncementsListSerializer, AnnouncementsRetrieveSerializer, \
-    AnnouncementsRetrieveUserSerializer, AnnouncementCreateSerializer, ImageSerializer
+    AnnouncementsRetrieveUserSerializer, ImageSerializer, AnnouncementCreateUpdateSerializer
 from src.base.permissions import IsAuthenticatedAndOwner
 
 
@@ -35,10 +36,11 @@ class RetrieveActiveAnnouncement(RetrieveAPIView):
         Автоувеличение количества просмотров
         Также не разрешаем пользователю набивать просмотры
         """
-        obj = self.get_object()
-        if obj.user != self.request.user:
-            obj.views = obj.views + 1
-            obj.save(update_fields=("views",))
+        if self.request.user:
+            obj = self.get_object()
+            if obj.user != self.request.user:
+                obj.views = obj.views + 1
+                obj.save(update_fields=("views",))
         return super().get(request, *args, **kwargs)
 
 
@@ -71,7 +73,7 @@ class CreateAnnouncement(CreateAPIView):
     """
 
     permission_classes = [IsAuthenticated]
-    serializer_class = AnnouncementCreateSerializer
+    serializer_class = AnnouncementCreateUpdateSerializer
 
     def perform_create(self, serializer):
         serializer.validated_data['user'] = self.request.user
@@ -80,7 +82,7 @@ class CreateAnnouncement(CreateAPIView):
 
 class CreateImagesForAnnouncement(CreateAPIView):
     """
-        Создание изображений
+        Создание изображений для объявлений
     """
     permission_classes = [IsAuthenticated]
     serializer_class = ImageSerializer
@@ -97,7 +99,7 @@ class CreateImagesForAnnouncement(CreateAPIView):
 
 class DestroyAnnouncement(DestroyAPIView):
     """
-        Удаление объявления
+        Удаление объявления, при удалении объявление будет помещено в архив
     """
     queryset = Announcements.objects.filter(status__in=['active', 'draft', 'rejected', 'on_moderation'])
     permission_classes = [IsAuthenticatedAndOwner]
@@ -108,3 +110,41 @@ class DestroyAnnouncement(DestroyAPIView):
         obj.status = 'archive'
         obj.save(update_fields=('status',))
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UpdateAnnouncement(UpdateAPIView):
+    """
+        Обновление объявлений
+    """
+    queryset = Announcements.objects.filter(status__in=['draft', 'rejected', 'on_moderation'])
+    serializer_class = AnnouncementCreateUpdateSerializer
+    permission_classes = [IsAuthenticatedAndOwner]
+    lookup_field = 'uuid'
+
+    def perform_update(self, serializer):
+        serializer.validated_data['update_at'] = timezone.now()
+        serializer.save()
+
+
+class UpdateImage(UpdateAPIView):
+    """
+        Обновление изображений в объявлении
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageSerializer
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        return Images.objects.filter(announcement__user=self.request.user.id)
+
+
+class DestroyImage(DestroyAPIView):
+    """
+        Удаление изображения в объявлении
+    """
+    permission_classes = [IsAuthenticated]
+    serializer_class = ImageSerializer
+    lookup_field = 'pk'
+
+    def get_queryset(self):
+        return Images.objects.filter(announcement__user=self.request.user.id)
